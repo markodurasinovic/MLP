@@ -12,13 +12,14 @@ class MLP:
         self.weights = list()
         self.bias = list()
         self.neurons = list()
+        self.error = list()
 
-    def fit(self, data, target):
+    def fit(self, data, targets):
         self.init_weights(data.shape[1])
         self.init_neurons()
 
-        out = self.forward_pass(data[0], self.sigmoid)
-        print(out)
+        err = self.forward_pass_batch(data, targets, self.sigmoid)
+        print(err)
 
         # if self.verbose:
         #     self.log()
@@ -53,6 +54,16 @@ class MLP:
             n.fill(0)
             self.neurons.append(n)
 
+    def forward_pass_batch(self, data, targets, activation_func):
+        if not self.error:
+            self.error = np.ndarray(len(data))
+        for i in range(len(data)):
+            out = self.forward_pass(data[i], activation_func)
+            self.error[i] = targets[i] - out
+
+        mse = 1 / len(self.error) * sum(self.error ** 2)
+        return mse
+
     def forward_pass(self, dp, activation_func):
         hidden_len = len(self.hidden_layers)
 
@@ -74,6 +85,7 @@ class MLP:
     def log(self):
         self.print_neurons()
         self.print_weights()
+        self.print_error()
 
     def print_weights(self):
         print("===printing weights===")
@@ -87,3 +99,7 @@ class MLP:
         for i in range(len(self.neurons)):
             print(i)
             print(self.neurons[i])
+
+    def print_error(self):
+        print("===printing error===")
+        print(self.error)
