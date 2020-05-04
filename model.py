@@ -16,12 +16,12 @@ df = df.drop(columns=["ZN", "INDUS", "CHAS", "NOX", "AGE", "DIS", "RAD", "TAX", 
 
 """splitting data & target"""
 M = df.to_numpy()
-M = np.matrix(M)
+M = np.array(M)
 target = M[:, 4]
 data = M[:, :4]
 
 # print(principal_components)
 print(f"datashape = {data.shape}")
 
-mlp = MLP(hidden_layers=(5, 5))
+mlp = MLP(hidden_layers=(5, 5), verbose=True)
 mlp.fit(data, target)
