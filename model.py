@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import math
 import numpy as np
+from scipy.cluster.vq import whiten
 
 from MLP import MLP
 
@@ -19,6 +20,7 @@ M = df.to_numpy()
 M = np.array(M)
 target = M[:, 4]
 data = M[:, :4]
+# data = whiten(data)
 
 # print(principal_components)
 print(f"datashape = {data.shape}")
@@ -27,4 +29,4 @@ mlp = MLP(hidden_layers=(5, 5), verbose=True)
 mlp.fit(data, target)
 
 # print(f"Result: {mlp.forward_pass(data)}")
-print(f"Loss: {np.mean(np.square(target - mlp.forward_pass(data)))}")
+# print(f"Loss: {np.mean(np.square(target - mlp.forward_pass(data)))}")
