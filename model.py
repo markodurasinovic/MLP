@@ -25,3 +25,6 @@ print(f"datashape = {data.shape}")
 
 mlp = MLP(hidden_layers=(5, 5), verbose=True)
 mlp.fit(data, target)
+
+# print(f"Result: {mlp.forward_pass(data)}")
+print(f"Loss: {np.mean(np.square(target - mlp.forward_pass(data)))}")
