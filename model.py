@@ -22,11 +22,20 @@ target = M[:, 4]
 data = M[:, :4]
 # data = whiten(data)
 
+# print(data)
+# print(target)
+
 # print(principal_components)
 print(f"datashape = {data.shape}")
 
-mlp = MLP(hidden_layers=(5, 5), verbose=True)
-mlp.fit(data, target)
+while True:
+    mlp = MLP(hidden_layers=(50, 60, 40), iterations=10000)
+    mlp.fit(data, target)
 
-# print(f"Result: {mlp.forward_pass(data)}")
-# print(f"Loss: {np.mean(np.square(target - mlp.forward_pass(data)))}")
+    print(f"Result: {mlp.predict(data)}")
+    print(f"Loss: {np.mean(np.square(target - mlp.predict(data)))}")
+
+# print(np.array([target]).T - mlp.predict(data))
+
+# print(mlp.weights)
+# print(mlp.bias)

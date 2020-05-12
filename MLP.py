@@ -2,9 +2,7 @@ import numpy as np
 
 
 class MLP:
-    def __init__(self, hidden_layers, learning_rate=0.0001, momentum=0.5, verbose=False, iterations=2):
-        self.verbose = verbose
-
+    def __init__(self, hidden_layers, learning_rate=0.00001, momentum=0.5, iterations=1000):
         self.hidden_layers = hidden_layers
         self.learning_rate = learning_rate
         self.momentum = momentum
@@ -21,6 +19,8 @@ class MLP:
         self.init_weights(data.shape[1])
         self.init_neurons()
         for i in range(self.iterations):
+            self.epoch = i
+            data, targets = self.shuffle(data, targets)
             self.train(data, targets)
 
     def init_weights(self, input_layer_size):
@@ -50,11 +50,22 @@ class MLP:
             n.fill(0)
             self.neurons.append(n)
 
+    def shuffle(self, data, targets):
+        # Shuffle data and targets in unison
+        indices = np.arange(data.shape[0])
+        np.random.shuffle(indices)
+
+        return data[indices], targets[indices]
+
     def train(self, data, targets):
         out = self.forward_pass(data)
         deltas = self.calculate_deltas(targets, out)
-        print(deltas)
         self.update_weights(data, deltas)
+
+    def predict(self, data):
+        out = self.forward_pass(data)
+
+        return out
 
     def forward_pass(self, data):
         hidden_len = len(self.hidden_layers)
@@ -65,13 +76,20 @@ class MLP:
             self.neurons[i] = self.sigmoid(n)
 
         output = self.neurons[hidden_len - 1].dot(self.weights[hidden_len]) + 1 * self.bias[hidden_len]
-        # print(output)
+
         return self.relu(output)
 
     def calculate_deltas(self, target, output):
         deltas = list()
 
-        error = target - output
+        mse = np.mean(np.square(target - output))
+        if mse < 10:
+            print(target - output)
+            print(f"Loss: {mse}")
+            print(f"Epoch: {self.epoch}")
+            exit(0)
+        error = output - target
+
         delta = error * self.relu(output, derivative=True)
         deltas.append(delta)
 
@@ -83,41 +101,30 @@ class MLP:
         return list(reversed(deltas))
 
     def update_weights(self, data, deltas):
-        self.weights[0] -= self.learning_rate * data.T.dot(deltas[0])
+        new_weights = self.weights[0] - (self.learning_rate * data.T.dot(deltas[0]))
+        self.weights[0] = new_weights
+
         temp = np.ndarray((1, 490))
         temp.fill(1)
-        self.bias[0] -= self.learning_rate * temp.dot(deltas[0])
+        new_weights = self.bias[0] - (self.learning_rate * temp.dot(deltas[0]))
+        self.bias[0] = new_weights
+
         for i in range(1, len(self.weights)):
-            self.weights[i] -= self.learning_rate * self.neurons[i - 1].T.dot(deltas[i])
-            self.bias[i] -= self.learning_rate * temp.dot(deltas[i])
+            new_weights = self.weights[i] - (self.learning_rate * self.neurons[i - 1].T.dot(deltas[i]))
+            self.weights[i] = new_weights
+
+            new_weights = self.bias[i] - (self.learning_rate * temp.dot(deltas[i]))
+            self.bias[i] = new_weights
 
     def sigmoid(self, x, derivative=False):
+        x = np.clip(x, -500, 500)
         if derivative:
             return x * (1 - x)
         else:
-            x = np.clip(x, -500, 500)
             return 1 / (1 + np.exp(-x))
 
     def relu(self, x, derivative=False):
         if derivative:
-            return np.where(x > 0, 1, 0)
+            return np.where(x > 0, 1, 0.01)
         else:
             return np.maximum(0.01 * x, x)
-
-    def log(self):
-        self.print_neurons()
-        self.print_weights()
-
-    def print_weights(self):
-        print("===printing weights===")
-        for w in self.weights:
-            print(w.shape)
-            # print(sum(w))
-            print(w)
-
-    def print_neurons(self):
-        print("===printing neurons===")
-        for i in range(len(self.neurons)):
-            print(i)
-            print(self.neurons[i])
-
