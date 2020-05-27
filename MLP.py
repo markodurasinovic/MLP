@@ -13,15 +13,22 @@ class MLP:
         self.deltas = list()
         self.bias = list()
 
-    def fit(self, data, targets):
+    def fit(self, data, targets, batch=True):
         targets = np.array([targets]).T
 
         self.init_weights(data.shape[1])
         self.init_neurons()
-        for i in range(self.iterations):
-            self.epoch = i
-            data, targets = self.shuffle(data, targets)
-            self.train(data, targets)
+        if batch:
+            for i in range(self.iterations):
+                self.epoch = i
+                data, targets = self.shuffle(data, targets)
+                self.train(data, targets)
+        else:
+            for i in range(self.iterations):
+                self.epoch = i
+                data, targets = self.shuffle(data, targets)
+                for j in range(data.shape[0]):
+                    self.train(np.array([data[j]]), targets[j])
 
     def init_weights(self, input_layer_size):
         hidden_len = len(self.hidden_layers)
@@ -83,11 +90,12 @@ class MLP:
         deltas = list()
 
         mse = np.mean(np.square(target - output))
-        if mse < 10:
-            print(target - output)
-            print(f"Loss: {mse}")
-            print(f"Epoch: {self.epoch}")
-            exit(0)
+        if self.epoch == self.iterations - 1:
+            res = [(target[i], output[i]) for i in range(target.shape[0])]
+            print(res)
+        #     # print(target - output)
+        print(f"Epoch: {self.epoch}")
+        print(f"Loss: {mse}")
         error = output - target
 
         delta = error * self.relu(output, derivative=True)
@@ -104,7 +112,7 @@ class MLP:
         new_weights = self.weights[0] - (self.learning_rate * data.T.dot(deltas[0]))
         self.weights[0] = new_weights
 
-        temp = np.ndarray((1, 490))
+        temp = np.ndarray((1, data.shape[0]))
         temp.fill(1)
         new_weights = self.bias[0] - (self.learning_rate * temp.dot(deltas[0]))
         self.bias[0] = new_weights

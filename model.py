@@ -20,20 +20,24 @@ M = df.to_numpy()
 M = np.array(M)
 target = M[:, 4]
 data = M[:, :4]
-# data = whiten(data)
+data = whiten(data)
 
 # print(data)
 # print(target)
 
-# print(principal_components)
-print(f"datashape = {data.shape}")
+# while True:
+# for i in [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]:
+# for i in range(50):
+mlp = MLP(hidden_layers=(5, 6, 6), iterations=10000)
+mlp.fit(data, target)
+# mlp.fit(data, target, False)
 
-while True:
-    mlp = MLP(hidden_layers=(50, 60, 40), iterations=10000)
-    mlp.fit(data, target)
-
-    print(f"Result: {mlp.predict(data)}")
-    print(f"Loss: {np.mean(np.square(target - mlp.predict(data)))}")
+# print(f"Result: {mlp.predict(data)}")
+# print(f"No. Iterations: {i}")
+# print(i)
+print(f"Loss: {np.mean(np.square(np.array([target]).T - mlp.predict(data)))}")
+print(mlp.predict(data))
+    # input()
 
 # print(np.array([target]).T - mlp.predict(data))
 
